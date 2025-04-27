@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern Picture Guess Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(145deg, #e0f7fa, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    #game {
+      background: #f0f8ff;
+      padding: 30px;
+      border-radius: 30px;
+      box-shadow: 12px 12px 24px #d1e0e6, -12px -12px 24px #ffffff;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    #level, #score {
+      font-weight: bold;
+      margin: 5px 0;
+      font-size: 16px;
+      color: #00796b;
+    }
+
+    img {
+      width: 220px;
+      height: 220px;
+      border-radius: 20px;
+      object-fit: cover;
+      margin: 15px 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 90%;
+      padding: 12px;
+      font-size: 16px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 15px;
+      box-shadow: inset 4px 4px 10px #d1d9e6, inset -4px -4px 10px #ffffff;
+      outline: none;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 14px;
+      border: none;
+      border-radius: 15px;
+      background-color: #009688;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00796b;
+    }
+
+    #result {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    #finalResult {
+      margin-top: 20px;
+    }
+
+    #whatsappLink {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: #25d366;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <h2>Picture Guess Game</h2>
+    <div id="level">Level: 1</div>
+    <div id="score">Score: 0</div>
+    <img id="questionImage" src="" alt="Guess Image" />
+    <input type="text" id="answerInput" placeholder="Type your answer here" />
+    <br />
+    <button onclick="checkAnswer()">Submit</button>
+    <button onclick="speakQuestion()">Play Sound</button>
+    <button onclick="startRecognition()">Speak Answer</button>
+    <div id="result"></div>
+
+    <div id="finalResult" style="display: none;">
+      <h3>Congratulations!</h3>
+      <p id="summaryText"></p>
+      <a id="whatsappLink" href="" target="_blank">Send Result via WhatsApp</a>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { img: "image/cat.png", word: "cat" },
+      { img: "image/dog.jpg", word: "dog" },
+      { img: "image/sun.png", word: "sun" },
+      { img: "image/moon.jpg", word: "moon" },
+      { img: "image/ball.png", word: "ball" },
+      { img: "image/fish.png", word: "fish" },
+      { img: "image/books.png", word: "books" },
+      { img: "image/apple.png", word: "apple" },
+      { img: "image/tree.png", word: "tree" },
+      { img: "image/car.png", word: "car" },
+      { img: "image/milk.jpg", word: "milk" },
+      { img: "image/bird.jpg", word: "bird" },
+      { img: "image/shoe.jpg", word: "shoe" },
+      { img: "image/hat.jpg", word: "hat" },
+      { img: "image/bed.jpg", word: "bed" },
+      { img: "image/rain.jpg", word: "rain" },
+      { img: "image/boy.jpg", word: "boy" },
+      { img: "image/girl.jpg", word: "girl" },
+      { img: "image/toys.png", word: "toys" },
+      { img: "image/egg.png", word: "egg" },
+      { img: "image/chair.png", word: "chair" },
+      { img: "image/table.png", word: "table" },
+      { img: "image/house.png", word: "house" },
+      { img: "image/water.png", word: "water" },
+      { img: "image/flower.png", word: "flower" },
+      { img: "image/clock.png", word: "clock" },
+      { img: "image/pencil.png", word: "pencil" },
+      { img: "image/paper.jpg", word: "paper" },
+      { img: "image/banana.png", word: "banana" },
+      { img: "image/orange.png", word: "orange" },
+      { img: "image/door.jpg", word: "door" },
+      { img: "image/window.png", word: "window" },
+      { img: "image/sunhat.png", word: "sunhat" },
+      { img: "image/sweater.png", word: "sweater" },
+      { img: "image/grass.jpg", word: "grass" },
+      { img: "image/chicken.png", word: "chicken" },
+      { img: "image/spoon.png", word: "spoon" },
+      { img: "image/fork.png", word: "fork" },
+      { img: "image/plate.jpg", word: "plate" },
+      { img: "image/bag.png", word: "bag" },
+      { img: "image/farmer.png", word: "farmer" },
+      { img: "image/doctor.png", word: "doctor" },
+      { img: "image/teacher.png", word: "teacher" },
+      { img: "image/student.png", word: "student" },
+      { img: "image/bus.png", word: "bus" },
+      { img: "image/train.png", word: "train" },
+      { img: "image/river.jpg", word: "river" },
+      { img: "image/mountain.png", word: "mountain" },
+      { img: "image/beach.jpg", word: "beach" },
+      { img: "image/family.jpg", word: "family" },
+      { img: "image/happy.png", word: "happy" },
+      { img: "image/sad.png", word: "sad" },
+      { img: "image/cold.jpg", word: "cold" },
+      { img: "image/hot.jpg", word: "hot" },
+      { img: "image/hungry.jpg", word: "hungry" },
+      { img: "image/angry.jpg", word: "angry" },
+      { img: "image/sleep.png", word: "sleep" },
+      { img: "image/run.jpg", word: "run" },
+      { img: "image/jump.jpg", word: "jump" },
+      { img: "image/walk.jpg", word: "walk" },
+      { img: "image/hospital.png", word: "hospital" },
+      { img: "image/library.png", word: "library" },
+      { img: "image/airport.jpg", word: "airport" },
+      { img: "image/police.png", word: "police" },
+      { img: "image/fireman.png", word: "fireman" },
+      { img: "image/singer.png", word: "singer" },
+      { img: "image/dancer.png", word: "dancer" },
+      { img: "image/writer.png", word: "writer" },
+      { img: "image/computer.png", word: "computer" },
+      { img: "image/television.jpg", word: "television" },
+      { img: "image/play-sound.jpg", word: "kitchen" },
+      { img: "image/play-sound.jpg", word: "bathroom" },
+      { img: "image/play-sound.jpg", word: "blanket" },
+      { img: "image/play-sound.jpg", word: "pillow" },
+      { img: "image/play-sound.jpg", word: "cupboard" },
+      { img: "image/play-sound.jpg", word: "camera" },
+      { img: "image/play-sound.jpg", word: "elephant" },
+      { img: "image/play-sound.jpg", word: "tiger" },
+      { img: "image/play-sound.jpg", word: "monkey" },
+      { img: "image/play-sound.jpg", word: "vacation" },
+      { img: "image/play-sound.jpg", word: "birthday" },
+      { img: "image/play-sound.jpg", word: "weather" },
+      { img: "image/play-sound.jpg", word: "season" },
+      { img: "image/play-sound.jpg", word: "exercise" },
+      { img: "image/play-sound.jpg", word: "breakfast" },
+      { img: "image/play-sound.jpg", word: "lunch" },
+      { img: "image/play-sound.jpg", word: "dinner" },
+      { img: "image/play-sound.jpg", word: "shopping" },
+      { img: "image/play-sound.jpg", word: "cleaning" },
+      { img: "image/play-sound.jpg", word: "brushing" },
+      { img: "image/play-sound.jpg", word: "studying" },
+      { img: "image/play-sound.jpg", word: "writing" },
+      { img: "image/play-sound.jpg", word: "drawing" },
+      { img: "image/play-sound.jpg", word: "swimming" },
+      { img: "image/play-sound.jpg", word: "painting" },
+      { img: "image/play-sound.jpg", word: "traveling" },
+      { img: "image/play-sound.jpg", word: "watching" },
+      { img: "image/play-sound.jpg", word: "listening" },
+      { img: "image/play-sound.jpg", word: "reading" },
+      { img: "image/play-sound.jpg", word: "good job" },
+      // Tambahkan hingga 50 soal jika ingin
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    const img = document.getElementById("questionImage");
+    const input = document.getElementById("answerInput");
+    const result = document.getElementById("result");
+    const level = document.getElementById("level");
+    const scoreDisplay = document.getElementById("score");
+    const finalResult = document.getElementById("finalResult");
+    const summaryText = document.getElementById("summaryText");
+    const whatsappLink = document.getElementById("whatsappLink");
+
+    function loadQuestion() {
+      if (current >= questions.length) {
+        showFinalResult();
+        return;
+      }
+      img.src = questions[current].img;
+      level.textContent = "Level: " + (current + 1);
+      scoreDisplay.textContent = "Score: " + score;
+      input.value = "";
+      result.textContent = "";
+    }
+
+    function checkAnswer() {
+      const userAnswer = input.value.trim().toLowerCase();
+      if (userAnswer === questions[current].word.toLowerCase()) {
+        result.textContent = "Benar!";
+        result.style.color = "green";
+        score += 10;
+      } else {
+        result.textContent = "SALAH! Jawabannya: " + questions[current].word;
+        result.style.color = "red";
+      }
+      current++;
+      setTimeout(loadQuestion, 3000);
+    }
+
+    function speakQuestion() {
+      const utterance = new SpeechSynthesisUtterance(questions[current].word);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
+    }
+
+    function startRecognition() {
+      if (!('webkitSpeechRecognition' in window)) {
+        alert("Your browser does not support Speech Recognition.");
+        return;
+      }
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.onresult = function (event) {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        input.value = transcript;
+        checkAnswer();
+      };
+      recognition.start();
+    }
+
+    function showFinalResult() {
+      document.getElementById("answerInput").style.display = "none";
+      document.getElementById("result").style.display = "none";
+      finalResult.style.display = "block";
+      summaryText.textContent = `You answered ${score / 10} out of ${questions.length} correctly. Total Score: ${score}`;
+      const phone = "6281243635245"; // Ganti dengan nomor WA
+      const message = encodeURIComponent(`Hasil Game Tebak Gambar:\nBenar: ${score / 10}/${questions.length}\nSkor: ${score}`);
+      whatsappLink.href = `https://wa.me/${phone}?text=${message}`;
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
